@@ -86,10 +86,15 @@ int main(int argc, const char *argv[])
         cout << "Remaining Moves : " << core.getRemainingMovesCount() << endl;
         cout << "Seed            : " << core.getSeed()                << endl;
         cout << "Random seed     : " << core.isUsingRandomSeed()      << endl;
+        cout << "Empty Coord     :"  << core.getEmptyValueCoord()     << endl;
+
         cout << endl;
 
-        int a;
-        cin >> a;
+        CoreCoord::Coord coord;
+        cin >> coord.y >> coord.x;
+
+        core.move(coord);
+
     }
     cout << "End status: " << core.getStatus() << endl;
 }

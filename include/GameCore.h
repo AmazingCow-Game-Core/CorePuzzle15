@@ -1,4 +1,3 @@
-
 //----------------------------------------------------------------------------//
 //               █      █                                                     //
 //               ████████                                                     //
@@ -128,10 +127,14 @@ public:
 public:
     MoveResult move(const CoreCoord::Coord &coord);
 
+    ///@brief Gets the Coord that have the kEmptyValue.
+    ///@returns The kEmptyValue Coord.
+    ///@see kEmptyValue, getBoard(), getValueAt();
+    const CoreCoord::Coord& getEmptyValueCoord();
 
     ///@brief   Gets the game Board.
     ///@returns Reference of the Board.
-    ///@see getValueAt().
+    ///@see getValueAt(), getEmptyValueCoord()
     const Board& getBoard() const;
 
     ///@brief Gets the value at CoreCoord::Coord.

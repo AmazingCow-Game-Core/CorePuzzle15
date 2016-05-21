@@ -124,6 +124,12 @@ GameCore::MoveResult GameCore::move(const CoreCoord::Coord &coord)
 #undef _DECIDE_DIR_COORD_ //We don't want this poluting...
 }
 
+
+const CoreCoord::Coord& GameCore::getEmptyValueCoord()
+{
+    return m_emptyCoord;
+}
+
 const GameCore::Board& GameCore::getBoard() const
 {
     return m_board;

@@ -43,6 +43,10 @@
 //std
 #include <algorithm>
 #include <sstream>
+#include <iomanip>
+#include <cmath>
+#include <iostream>
+using namespace std;
 
 //Usings
 USING_NS_COREPUZZLE15;
@@ -81,16 +85,43 @@ GameCore::MoveResult GameCore::move(const CoreCoord::Coord &coord)
 
     //Coord isn't at same row or col from the empty coord.
     //Cannot move - Don't do anything...
-    if(!m_emptyCoord.isSameX(coord) && m_emptyCoord.isSameY(coord))
+    if(!m_emptyCoord.isSameX(coord) && !m_emptyCoord.isSameY(coord))
         return result;
 
     //Set Increment coord.
-    auto incrCoord = (coord.x < m_emptyCoord.x) ? CoreCoord::Coord::Left () :
-                     (coord.x > m_emptyCoord.x) ? CoreCoord::Coord::Right() :
-                     (coord.y < m_emptyCoord.y) ? CoreCoord::Coord::Up   () :
-                   /*(coord.y > m_emptyCoord.y)*/ CoreCoord::Coord::Down ();
+    CoreCoord::Coord incrCoord;
 
+    //Since all logic is equal, only changing is the
+    //method's name that will be called, I think that's a good use for a macro.
+    //See (A Arte de Escrever Programas Legiveis - ISBN 978-85-7522-294-2)
+    //Chapter 8, pag 105 for more :)
+#define _DECIDE_DIR_COORD_(_cond_, _dir_)                    \
+    if(_cond_) {                                             \
+        incrCoord = CoreCoord::Coord::_dir_();               \
+        result.moveDirection = MoveResult::Direction::_dir_; \
+    }
 
+    _DECIDE_DIR_COORD_(coord.x < m_emptyCoord.x, Left );
+    _DECIDE_DIR_COORD_(coord.x > m_emptyCoord.x, Right);
+    _DECIDE_DIR_COORD_(coord.y < m_emptyCoord.y, Up   );
+    _DECIDE_DIR_COORD_(coord.y > m_emptyCoord.y, Down );
+
+    for(auto currCoord = m_emptyCoord;
+        currCoord != coord;
+        currCoord += incrCoord)
+    {
+        result.previousCoords.push_back(currCoord + incrCoord);
+        result.currentCoords.push_back (currCoord);
+
+        swapValuesAt(currCoord + incrCoord, currCoord);
+    }
+
+    ++m_movesCount;
+    checkStatus();
+
+    m_emptyCoord = coord;
+    return result;
+#undef _DECIDE_DIR_COORD_ //We don't want this poluting...
 }
 
 const GameCore::Board& GameCore::getBoard() const
@@ -154,11 +185,12 @@ bool GameCore::isUsingRandomSeed() const
 std::string GameCore::ascii() const
 {
     std::stringstream ss;
+    auto digits = static_cast<int>(std::log10(getWidth() * getHeight())) + 1;
 
     for(const auto &line : m_board)
     {
         for(const auto &value : line)
-            ss << value << " ";
+            ss << std::setw(digits) << std::setfill('0') << value << " ";
         ss << std::endl;
     };
 
@@ -186,10 +218,11 @@ void GameCore::initBoard(int width, int height)
                     width,
                     std::begin(m_board[i]));
 
+
         //Try find the kEmptyValue in this row...
         //If it was found update the emptyCoord
         //i.e that coord will contain the kEmptyValue at start.
-        if(m_emptyCoord.y != -1 && m_emptyCoord.x != -1)
+        if(m_emptyCoord.y == -1 && m_emptyCoord.x == -1)
         {
             auto it = std::find(std::begin(m_board[i]),
                                 std::end  (m_board[i]),
@@ -198,7 +231,8 @@ void GameCore::initBoard(int width, int height)
             if(it != std::end(m_board[i]))
             {
                 m_emptyCoord.y = i;
-                m_emptyCoord.x = std::begin(m_board[0]) - it;
+                m_emptyCoord.x = static_cast<int>(it - std::begin(m_board[i]));
+                cout << static_cast<int>(it - std::begin(m_board[i])) << endl;
             }
         }
     }//for(int i = 0; i < height; ++i)
@@ -248,4 +282,11 @@ bool GameCore::valuesAreSorted()
     }
 
     return true;
+}
+
+void GameCore::swapValuesAt(const CoreCoord::Coord &coord1,
+                            const CoreCoord::Coord &coord2)
+{
+    std::swap(m_board[coord1.y][coord1.x],
+              m_board[coord2.y][coord2.x]);
 }

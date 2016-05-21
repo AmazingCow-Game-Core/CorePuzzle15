@@ -1,3 +1,4 @@
+
 //----------------------------------------------------------------------------//
 //               █      █                                                     //
 //               ████████                                                     //
@@ -78,7 +79,7 @@ public:
         //Types
         enum class Direction {
             Up,
-            Dowm,
+            Down,
             Left,
             Right,
             None
@@ -94,7 +95,7 @@ public:
         //Vars
         Direction             moveDirection;
         CoreCoord::Coord::Vec previousCoords;
-        CoreCoord::Coord::Vec currentCoord;
+        CoreCoord::Coord::Vec currentCoords;
     };
 
 
@@ -207,7 +208,8 @@ private:
     void checkStatus();
     bool valuesAreSorted();
 
-    void putValueAt(const CoreCoord::Coord &coord, int value);
+    void swapValuesAt(const CoreCoord::Coord &coord1,
+                      const CoreCoord::Coord &coord2);
 
     // iVars //
 private:
